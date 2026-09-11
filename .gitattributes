@@ -1,0 +1,28 @@
+# 统一以 LF 存储，避免 Windows 检出时把脚本转成 CRLF
+# （CRLF 会破坏 shebang 行，并可能导致 CI 上脚本执行失败）
+
+* text=auto eol=lf
+
+# 明确指定为文本并强制 LF
+*.md      text eol=lf
+*.mjs     text eol=lf
+*.js      text eol=lf
+*.py      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.json    text eol=lf
+*.tmpl    text eol=lf
+*.ts      text eol=lf
+
+# 明确标记为二进制，禁止任何行尾转换
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.webp    binary
+*.ico     binary
+*.zip     binary
+
+# 让 GitHub 语言统计与 diff 更准确
+install.mjs              linguist-language=JavaScript
+.github/scripts/*.mjs    linguist-language=JavaScript

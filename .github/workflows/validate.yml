@@ -1,0 +1,85 @@
+name: Validate
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: 校验技能结构
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 校验 skills/ 下的技能包
+        run: node .github/scripts/validate-skills.mjs
+
+      - name: 校验安装器可用
+        run: |
+          node install.mjs --list
+          node install.mjs --agent claude-code,codex,dsh,workbuddy --dry-run
+
+  doctor:
+    name: 体检脚本自检
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 构造最小 Cocos 工程并运行体检脚本
+        run: |
+          set -e
+          FIX=/tmp/fixture
+          mkdir -p "$FIX/assets/scripts" "$FIX/assets/resources"
+          printf '{ "name": "fixture", "creator": { "version": "3.8.9" } }\n' > "$FIX/package.json"
+
+          printf "import { Component } from 'cc';\n" > "$FIX/assets/scripts/A.ts"
+          printf '{}\n' > "$FIX/assets/scripts/A.ts.meta"
+
+          # 故意制造一个缺 .meta 的资源，脚本应报 ERROR 并以退出码 1 结束
+          printf 'fake image\n' > "$FIX/assets/resources/hero.png"
+
+          set +e
+          python skills/cocos-creator/scripts/cocos_doctor.py --project "$FIX"
+          code=$?
+          set -e
+
+          if [ "$code" -ne 1 ]; then
+            echo "::error::体检脚本未按预期检出缺失的 .meta（退出码 $code）"
+            exit 1
+          fi
+          echo "✔ 体检脚本正确检出了缺失的 .meta"
+
+      - name: 校验体检脚本正确识别版本号
+        run: |
+          python skills/cocos-creator/scripts/cocos_doctor.py --project /tmp/fixture | grep -q '3.8.9' \
+            || { echo "::error::体检脚本未能从 package.json 读取 creator.version"; exit 1; }
+          echo "✔ 版本号识别正确"
+
+      - name: 校验 JSON 输出可解析
+        run: |
+          python skills/cocos-creator/scripts/cocos_doctor.py --project /tmp/fixture --json > /tmp/out.json || true
+          python -c "import json; d=json.load(open('/tmp/out.json')); assert d['errors'] >= 1, d; assert d['version']['creator'] == '3.8.9', d; print('✔ JSON 输出结构正确')"
+
+      - name: 校验目录 .meta 不被误判为孤儿
+        run: |
+          printf '{}\n' > /tmp/fixture/assets/resources.meta
+          set +e
+          python skills/cocos-creator/scripts/cocos_doctor.py --project /tmp/fixture --json > /tmp/out2.json
+          set -e
+          python -c "
+          import json
+          d = json.load(open('/tmp/out2.json'))
+          orphans = [f for f in d['findings'] if f['code'] == 'META_ORPHAN']
+          assert not orphans, ('目录 .meta 被误判为孤儿：', orphans)
+          print('✔ 目录 .meta 未被误判为孤儿')
+          "

@@ -1,0 +1,52 @@
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- Node ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# ---- Cocos Creator 工程产物（若在本仓库调试体检脚本）----
+library/
+temp/
+local/
+build/
+profiles/
+native/
+
+# ---- 安装器的本地测试残留 ----
+.ccs-install-test/
+
+# ---- 本地环境变量 ----
+.env
+.env.local
+
+# ---- 技能安装产物（可能被工程级安装生成）----
+# 注意：这些是「别人装本技能到本仓库」的产物，不应提交
+.agents/skills/cocos-creator/
+.claude/skills/cocos-creator/
+.codex/skills/cocos-creator/
+.dsh/skills/cocos-creator/
+.workbuddy/skills/cocos-creator/
+.openclaw/skills/cocos-creator/
+.cursor/skills/cocos-creator/
+.windsurf/skills/cocos-creator/

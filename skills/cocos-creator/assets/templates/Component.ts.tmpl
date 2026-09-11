@@ -1,0 +1,56 @@
+import { _decorator, Component, Node } from 'cc';
+
+const { ccclass, property } = _decorator;
+
+/**
+ * ${NAME}
+ *
+ * ${DESCRIPTION}
+ *
+ * 使用提示：
+ * 1. 组件挂载到节点后，用 @property 暴露需要在编辑器里配置的字段
+ * 2. 事件注册与反注册必须成对，且 target 一致
+ * 3. 跨节点引用在 onLoad 阶段可能未就绪，放在 start 里更安全
+ */
+@ccclass('${NAME}')
+export class ${NAME} extends Component {
+    @property({ tooltip: '${FIELD_TOOLTIP}' })
+    public speed: number = 100;
+
+    @property(Node)
+    public target: Node | null = null;
+
+    protected onLoad(): void {
+        // 自身初始化：缓存组件引用，避免在 update 里反复 getComponent
+    }
+
+    protected start(): void {
+        // 依赖其他节点的初始化
+        this.registerEvents();
+    }
+
+    protected onEnable(): void {
+        this.registerEvents();
+    }
+
+    protected onDisable(): void {
+        this.unregisterEvents();
+    }
+
+    protected onDestroy(): void {
+        this.unregisterEvents();
+    }
+
+    protected update(dt: number): void {
+        // 每帧逻辑，dt 单位为秒
+    }
+
+    private registerEvents(): void {
+        // 注意：on / off 必须传入同一个 this 作为 target
+        // this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+    }
+
+    private unregisterEvents(): void {
+        // this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+    }
+}
