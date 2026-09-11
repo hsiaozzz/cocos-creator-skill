@@ -108,6 +108,7 @@ docs: 补充 dsh 平台安装路径
 ## 不要做的事
 
 - ❌ 不要在仓库根目录放 `SKILL.md`（历史上犯过这个错：`npx skills add` 与所有平台都找不到它）
-- ❌ 不要新增根目录的散装 `.md`（除了 `README.md` / `CHANGELOG.md` / `CONTRIBUTING.md` / `AGENTS.md`）
+- ❌ 不要新增根目录的散装 `.md`（除了 `README.md` / `README.zh-CN.md` / `CHANGELOG.md` / `CONTRIBUTING.md` / `AGENTS.md`）
+- ❌ 不要只更新两份 README 中的一份。`README.md`（英文）与 `README.zh-CN.md`（中文）是同一份文档的两个语言版本，改一处必须同步另一处，否则 CI 会失败
 - ❌ 不要引入构建工具链或 npm 依赖
 - ❌ 不要为了"看起来完整"而堆砌未经核实的内容

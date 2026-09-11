@@ -204,11 +204,52 @@ function main() {
   }
 
   // 根目录散装 md 检查
-  const allowedRootMd = new Set(['README.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'AGENTS.md', 'LICENSE.md']);
+  const allowedRootMd = new Set([
+    'README.md',
+    'README.zh-CN.md',
+    'CHANGELOG.md',
+    'CONTRIBUTING.md',
+    'AGENTS.md',
+    'LICENSE.md',
+  ]);
   for (const f of fs.readdirSync(ROOT)) {
     if (f.endsWith('.md') && !allowedRootMd.has(f)) {
       warn(`根目录存在未登记的 Markdown 文件：${f}（技能内容应放在 skills/<name>/ 下）`);
     }
+  }
+
+  // 双语 README 完整性检查：两份都要在，且互相有语言切换链接，
+  // 并且都必须包含完整的安装说明（安装是这个仓库最重要的用户路径，不能缺）
+  const readmes = [
+    { file: 'README.md', lang: '英文', other: 'README.zh-CN.md', installHeading: '## Installation' },
+    { file: 'README.zh-CN.md', lang: '中文', other: 'README.md', installHeading: '## 安装' },
+  ];
+
+  for (const { file, lang, other, installHeading } of readmes) {
+    const full = path.join(ROOT, file);
+    if (!fs.existsSync(full)) {
+      err(`缺少${lang} README：${file}`);
+      continue;
+    }
+
+    const text = fs.readFileSync(full, 'utf8');
+
+    if (!text.includes(`](${other})`)) {
+      err(`${file} 缺少指向 ${other} 的语言切换链接`);
+    }
+
+    if (!text.includes(installHeading)) {
+      err(`${file} 缺少安装章节（期望标题：${installHeading.trim()}）`);
+    }
+
+    // 安装章节必须覆盖三种安装方式，避免文档退化成"只有一句 npx"
+    for (const keyword of ['npx skills add hsiaozzz/cocos-creator-skill', 'install.mjs']) {
+      if (!text.includes(keyword)) {
+        warn(`${file} 的安装说明中未提到 ${keyword}`);
+      }
+    }
+
+    notes.push(`${file}：${text.split('\n').length} 行，语言切换与安装章节齐备`);
   }
 
   return finish();

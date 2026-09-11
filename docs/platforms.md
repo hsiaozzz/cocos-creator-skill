@@ -49,9 +49,9 @@
 
 > Windows 下把 `~` 展开为 `C:\Users\<你的用户名>`。
 
-## 三、完整平台列表（100+）
+## 三、完整平台列表（79 个）
 
-skills CLI 支持 100+ 平台，且会自动检测本机已安装的 Agent。查完整列表：
+官方 skills CLI 内置 **79 个 Agent** 的技能目录映射，且会自动检测本机已安装的 Agent。查完整列表：
 
 ```bash
 npx skills add hsiaozzz/cocos-creator-skill --list
@@ -70,7 +70,7 @@ node install.mjs --list
 
 | 方式 | 命令 | 适用场景 |
 |---|---|---|
-| **官方 skills CLI**（推荐） | `npx skills add hsiaozzz/cocos-creator-skill --all` | 覆盖 100+ 平台，自动软链接，支持 `update` / `remove` |
+| **官方 skills CLI**（推荐） | `npx skills add hsiaozzz/cocos-creator-skill --all` | 覆盖 79 个平台，自动软链接，支持 `update` / `remove` |
 | **本仓库安装器** | `node install.mjs --all` | 需要装到 **dsh / WorkBuddy**（官方 CLI 暂不含这两个），或离线 / 内网环境 |
 | **手动复制** | 见下 | 完全离线，或只想给某一个项目用 |
 

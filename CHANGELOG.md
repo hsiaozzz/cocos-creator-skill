@@ -2,6 +2,22 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/) 与 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [2.0.1] - 2026-09-11
+
+> 本次为仓库文档级变更，**技能内容（`SKILL.md` 与 `references/`）没有改动**，技能自身的 `metadata.version` 仍为 `2.0.0`。
+
+### 变更
+
+- **README 拆分为中英两份独立文件**：`README.md`（英文）与 `README.zh-CN.md`（简体中文），两份均以顶部语言切换链接互相指向，结构与内容对齐。此前四种语言塞在同一个文件里，安装说明被压缩成几行片段。
+- **安装说明大幅扩写**：三种安装方式各自给出完整参数表、可复制的分平台命令（macOS / Linux / Git Bash 与 Windows PowerShell 双份）、工程级 / 用户级的切换写法、装完的四步验证流程、升级与卸载命令，以及一张「症状 → 原因 → 修复」的排查表。
+- **修正夸大的平台数量**：此前文中称官方 `skills` CLI 支持「100+ 平台」，实测上游 `src/agents.ts` 为 **79 个**（上游 README 亦自述 "…and 75 more"）。已按实测值修正 `README.md`、`docs/platforms.md`、`install.mjs` 与徽章。
+- 移除原 README 中日文 / 韩文段落（内容为摘要的翻译，维护成本高于价值）。
+
+### 新增
+
+- **CI 新增双语 README 校验**：检查两份 README 均存在、互相包含语言切换链接、且都含完整安装章节，防止后续改动只更新一半。
+- **`README.zh-CN.md` 纳入根目录 Markdown 白名单**，否则 CI 会将其判为散装文档。
+
 ## [2.0.0] - 2026-09-11
 
 一次面向「AI Agent 生态」的全面重构。核心变更是**让技能真正可被安装**。

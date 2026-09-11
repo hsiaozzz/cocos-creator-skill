@@ -272,7 +272,7 @@ cocos-creator-skill 安装器
   node install.mjs --agent claude-code,codex,dsh,workbuddy
   node install.mjs -a dsh -p ./my-game
 
-提示: 更通用的方式是使用官方 skills CLI（支持 100+ 平台，自动软链接）:
+提示: 更通用的方式是使用官方 skills CLI（支持 79 个平台，自动软链接）:
   npx skills add hsiaozzz/cocos-creator-skill --all
 `);
 }

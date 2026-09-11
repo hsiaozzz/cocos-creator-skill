@@ -6,303 +6,504 @@
 [![Cocos Creator](https://img.shields.io/badge/Cocos%20Creator-3.8.x-2f6fdf.svg)](https://www.cocos.com/)
 [![COCOS 4](https://img.shields.io/badge/COCOS%204-MIT%20Open%20Source-16a34a.svg)](https://github.com/cocos/cocos4)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-6c5ce7.svg)](https://agentskills.io/specification)
-[![Platforms](https://img.shields.io/badge/Platforms-100%2B-orange.svg)](docs/platforms.md)
+[![Platforms](https://img.shields.io/badge/Platforms-79%2B-orange.svg)](docs/platforms.md)
 
-*面向 AI 编码助手的 Cocos Creator 游戏开发技能包*
+**Cocos Creator 3.8.x / COCOS 4 game-development skill for AI coding agents**
 
-[English](#english) · [中文](#中文) · [日本語](#日本語) · [한국어](#한국어) · [平台支持](docs/platforms.md) · [更新日志](CHANGELOG.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Platform support](docs/platforms.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
 ---
 
-## 中文
+## What is this
 
-### 这是什么
+A skill package following the [Agent Skills open standard](https://agentskills.io/specification) that injects Cocos Creator game-development expertise into AI coding agents.
 
-这是一个遵循 [Agent Skills 开放标准](https://agentskills.io/specification) 的**技能包**，为 AI 编码助手注入 Cocos Creator 游戏开发的领域知识与工作流。
+It is not a docs dump — it is an **executable workflow**: confirm the engine version → locate the code → write → **verify (mandatory)** → self-check before delivery. It ships with anti-rationalization rules and a red-flags list designed to stop an agent from shipping code that merely "looks right".
 
-它不是一份"文档合集"，而是一套**可执行的工作流**：先确认引擎版本 → 定位代码位置 → 写代码 → **必须验证** → 提交前自查。里面内置了防偷懒条目和危险信号清单，专门堵住 AI "看着对就交付"的退路。
+The same unmodified `SKILL.md` works on Claude Code, Codex CLI, DeepSeek Harness (dsh), WorkBuddy, Cursor, GitHub Copilot, Gemini CLI, OpenClaw and [70+ more platforms](docs/platforms.md).
 
-**同一份技能，在 Claude Code、Codex CLI、DeepSeek Harness (dsh)、WorkBuddy、Cursor、Copilot、Gemini CLI、OpenClaw 等 100+ 平台上都能直接用。**
-
-### 安装
-
-#### 方式一：官方 skills CLI（推荐）
-
-自动检测本机已安装的 Agent，一次性装好：
-
-```bash
-npx skills add hsiaozzz/cocos-creator-skill --all
-```
-
-只装到指定平台：
-
-```bash
-npx skills add hsiaozzz/cocos-creator-skill -a claude-code -a codex -g -y
-```
-
-#### 方式二：本仓库自带安装器（覆盖 dsh / WorkBuddy）
-
-官方 CLI 目前**不包含 DeepSeek Harness (dsh) 和 WorkBuddy**，用本仓库的安装器可以精确覆盖：
-
-```bash
-git clone https://github.com/hsiaozzz/cocos-creator-skill.git
-cd cocos-creator-skill
-
-node install.mjs --list                                        # 查看所有平台与本机检测结果
-node install.mjs --agent claude-code,codex,dsh,workbuddy       # 装到指定平台
-node install.mjs --all                                         # 装到所有检测到的平台
-node install.mjs --all --project .                             # 装到当前工程而非用户目录
-```
-
-零依赖，只需 Node.js 18+。加 `--dry-run` 可先预览将要执行的操作。
-
-#### 方式三：手动复制
-
-```bash
-git clone https://github.com/hsiaozzz/cocos-creator-skill.git
-mkdir -p ~/.agents/skills
-cp -r cocos-creator-skill/skills/cocos-creator ~/.agents/skills/
-```
-
-> **关键**：`~/.agents/skills/` 是绝大多数平台共用的通用目录 —— 装到这里一次，Amp、Cline、Cursor（工程级）、Copilot、Gemini CLI、Kilo Code、OpenCode、Zed、Warp 等平台就都能发现它。
-
-各平台的精确目录见 [docs/platforms.md](docs/platforms.md)。
-
-### 装完验证
-
-重启对应 Agent（或至少新开一个会话），然后问一句能命中触发词的话：
-
-```
-用 Cocos Creator 写一个玩家移动控制器，并说明我会踩哪些坑。
-```
-
-命中后，助手会先问你引擎版本，再给代码，最后要求跑验证 —— 而不是直接吐一段代码就完事。
-
-### 它覆盖什么
-
-| 能力 | 说明 |
-|---|---|
-| **版本判定** | 先确认 2.x / 3.x / COCOS 4，避免写出不可用的 API |
-| **脚本开发** | TypeScript 组件、生命周期、`@ccclass` / `@property` 装饰器 |
-| **节点与组件** | 查找、层级、实例化、组件缓存 |
-| **事件系统** | 注册与反注册配对，防止场景切换后的内存泄漏 |
-| **动画** | `Animation` 组件与 `tween` 补间 |
-| **物理** | 刚体、碰撞、事件回调 |
-| **UI** | Label / Sprite / Button / Widget / Layout 与多分辨率适配 |
-| **资源管理** | `resources.load`、AssetBundle、引用计数释放、对象池 |
-| **性能优化** | DrawCall 与合批、GC 抖动、包体与首屏加载的量化路径 |
-| **多平台发布** | 微信 / 抖音小游戏分包、H5、iOS、Android、HarmonyOS Next |
-| **COCOS 4 迁移** | 3.8 → COCOS 4 流程、cocos-cli / Headless 构建、AI-Native 变化 |
-
-### 技能结构
-
-```
-skills/cocos-creator/
-├── SKILL.md                    # 入口与路由：核心工作流 + 速查表（< 500 行）
-├── references/                 # 按需加载，不占初始上下文
-│   ├── api-quick-ref.md        # API 速查
-│   ├── examples.md             # 完整可运行示例
-│   ├── best-practices.md       # 架构与规范
-│   ├── performance.md          # 性能优化量化指南
-│   ├── publishing.md           # 多平台构建发布
-│   ├── troubleshooting.md      # 问题排查手册
-│   └── cocos4-migration.md     # 3.8 → COCOS 4 迁移
-├── scripts/
-│   └── cocos_doctor.py         # 工程体检：.meta 缺失、孤儿 .meta、大资源、老 API 残留
-└── assets/templates/           # 组件模板
-```
-
-**渐进式披露**：`SKILL.md` 只放核心流程与路由表，详细内容按需从 `references/` 读取，避免一次性占满模型的上下文窗口。
-
-### 内置工程体检工具
-
-```bash
-python skills/cocos-creator/scripts/cocos_doctor.py --project /path/to/your-game
-```
-
-检查项：
-
-- 资源缺失 `.meta`（会导致构建时引用丢失）
-- 孤儿 `.meta`（源文件已删除但 `.meta` 残留）
-- `assets/resources` 体积过大（首屏加载风险）
-- 单文件超阈值（包体风险）
-- 2.x 老式 API 残留（`cc.Class` / `cc.Node` / `cc.director`）
-- 注册了事件但看不到反注册的脚本（内存泄漏风险）
-
-支持 `--json` 输出，便于接入 CI。存在 ERROR 级问题时退出码为 1。
-
-### 参与贡献
-
-欢迎提 Issue 与 PR。修正事实性错误、补充新版本 API、完善平台适配都很有价值 —— 详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-### 开源协议
-
-MIT License —— 详见 [LICENSE](LICENSE)
+> **In a hurry?** One command, then restart your agent:
+>
+> ```bash
+> npx skills add hsiaozzz/cocos-creator-skill --all
+> ```
 
 ---
 
-## English
+## Table of contents
 
-### What is this
+- [Installation](#installation)
+  - [Step 0 — Pick a method](#step-0--pick-a-method)
+  - [Method 1 — Official `skills` CLI](#method-1--official-skills-cli-recommended)
+  - [Method 2 — Bundled installer](#method-2--bundled-installer-covers-dsh--workbuddy)
+  - [Method 3 — Manual install](#method-3--manual-install)
+- [Verify the installation](#verify-the-installation)
+- [Project-level vs user-level](#project-level-vs-user-level)
+- [Update & uninstall](#update--uninstall)
+- [What it covers](#what-it-covers)
+- [Skill structure](#skill-structure)
+- [Built-in project doctor](#built-in-project-doctor)
+- [Troubleshooting install issues](#troubleshooting-install-issues)
+- [Contributing](#contributing) · [License](#license)
 
-A skill package following the [Agent Skills open standard](https://agentskills.io/specification) that injects Cocos Creator game-development expertise and workflow into AI coding agents.
+---
 
-It is not a docs dump — it is an **executable workflow**: confirm the engine version → locate the code → write → **verify (mandatory)** → self-check before delivery. It ships with anti-rationalization rules and a red-flags list designed to block an agent from shipping code that "looks right".
+## Installation
 
-**The same skill works unmodified across Claude Code, Codex CLI, DeepSeek Harness (dsh), WorkBuddy, Cursor, Copilot, Gemini CLI, OpenClaw and 100+ more platforms.**
+### Step 0 — Pick a method
 
-### Install
+| | Method | One command | Covers | Requires |
+|---|---|---|---|---|
+| **1** | Official `skills` CLI | `npx skills add hsiaozzz/cocos-creator-skill --all` | 79 platforms, auto-detected | Node.js 18+ |
+| **2** | Bundled `install.mjs` | `node install.mjs --agent dsh,workbuddy` | 25 platforms incl. **dsh** & **WorkBuddy** | Node.js 18+, git |
+| **3** | Manual copy | `cp -r skills/cocos-creator ~/.agents/skills/` | Any platform you point it at | git (or just download the ZIP) |
 
-**Option 1 — Official skills CLI (recommended):**
+**Which one do you want?**
+
+- **Just works, most people** → Method 1.
+- **You use DeepSeek Harness (dsh) or WorkBuddy** → Method 2 (or Method 3). The official CLI has no `dsh` / `workbuddy` entry in its agent list.
+- **No npm, offline machine, or air-gapped network** → Method 3.
+- **You only want it for one specific project** → any method, then add the project-level flag (`-g`-off / `--project` / copy into the project directory). See [Project-level vs user-level](#project-level-vs-user-level).
+
+<details>
+<summary>Prerequisites in detail</summary>
+
+| Requirement | Needed for | Notes |
+|---|---|---|
+| **Node.js 18+** | Method 1, Method 2 | Only to *run the installer*. The skill itself is plain Markdown — it has no runtime dependency. |
+| **git** | Method 2, Method 3 | Method 3 also works by downloading and unzipping the repo, no git needed. |
+| **Python 3.8+** | *optional* | Only for `scripts/cocos_doctor.py` (the project health check). The skill works fine without Python. |
+| **Cocos Creator editor / `cocos-cli`** | *optional* | Only needed for actual command-line builds. |
+
+Check your Node version:
+
+```bash
+node -v          # must print v18.x or higher
+```
+</details>
+
+---
+
+### Method 1 — Official `skills` CLI (recommended)
+
+The `skills` CLI from [vercel-labs/skills](https://github.com/vercel-labs/skills) is the cross-platform installer. It knows the skills directory of **79 agents** and auto-detects which ones you have installed.
+
+**Install for every agent detected on your machine (user-level, no prompts):**
 
 ```bash
 npx skills add hsiaozzz/cocos-creator-skill --all
 ```
 
-**Option 2 — Bundled installer (covers dsh / WorkBuddy):**
+`--all` is shorthand for `--skill '*' --agent '*' -y`. With `-y` the CLI skips the interactive prompts and auto-detects the scope (project-level if you are inside a project, otherwise user-level).
 
-The official CLI currently does **not** include DeepSeek Harness (dsh) or WorkBuddy:
+**Install to specific agents only:**
+
+```bash
+# One agent
+npx skills add hsiaozzz/cocos-creator-skill -a claude-code
+
+# Several agents (repeat the flag)
+npx skills add hsiaozzz/cocos-creator-skill -a claude-code -a codex -a cursor
+```
+
+**Force user-level so every project on the machine can use it:**
+
+```bash
+npx skills add hsiaozzz/cocos-creator-skill --all -g
+```
+
+**Other useful things this CLI can do:**
+
+```bash
+# Preview what is in the repo without installing anything
+npx skills add hsiaozzz/cocos-creator-skill --list
+
+# Try the skill in a prompt without installing it at all
+npx skills use hsiaozzz/cocos-creator-skill@cocos-creator
+
+# See what is currently installed
+npx skills list          # project-level
+npx skills list -g       # user-level
+```
+
+**Full `add` flag reference:**
+
+| Flag | Alias | Meaning |
+|---|---|---|
+| `--global` | `-g` | Install user-level (all projects) instead of project-level |
+| `--agent <agents>` | `-a` | Target specific agents; use `*` for all. Repeatable. |
+| `--skill <skills>` | `-s` | Target specific skill names; use `*` for all |
+| `--list` | `-l` | List the skills available in the repo, install nothing |
+| `--yes` | `-y` | Skip confirmation and scope prompts |
+| `--all` | | Shorthand for `--skill '*' --agent '*' -y` |
+| `--copy` | | Copy files instead of symlinking into agent directories |
+| `--subagent <names>` | | Install to Eve subagents (`root` for the root agent) |
+| `--full-depth` | | Search all subdirectories even when a root `SKILL.md` exists |
+
+> **How the agent names work**: `-a` takes the CLI's own agent keys, e.g. `claude-code`, `codex`, `cursor`, `gemini-cli`, `github-copilot`, `openclaw`, `trae`, `qoder`, `qwen-code`, `lingma`, `windsurf`, `amp`, `cline`, `kilo`, `opencode`, `zed`, `warp`… The authoritative list lives in [src/agents.ts](https://github.com/vercel-labs/skills/blob/main/src/agents.ts). If you are unsure, use `-a '*'` and let auto-detection handle it.
+
+> **`npx` is not a typo** — it runs the package without a global install. If you use it often, `npm i -g skills` makes the plain `skills` command available.
+
+---
+
+### Method 2 — Bundled installer (covers dsh / WorkBuddy)
+
+Official CLI agent lists do **not** include entries for **DeepSeek Harness (dsh)** or **WorkBuddy**, so this repo ships its own zero-dependency installer that does — along with correct paths for 23 more platforms. Use this if you are on dsh or WorkBuddy, or if you are behind a restrictive network and want a fully local install.
 
 ```bash
 git clone https://github.com/hsiaozzz/cocos-creator-skill.git
 cd cocos-creator-skill
-
-node install.mjs --list
-node install.mjs --agent claude-code,codex,dsh,workbuddy
-node install.mjs --all
 ```
 
-Zero dependencies, Node.js 18+ only. Add `--dry-run` to preview.
+**Step 1 — See what is supported, and what you already have installed:**
 
-**Option 3 — Manual copy:**
+```bash
+node install.mjs --list
+```
+
+This prints every registered platform with its project-level and user-level target path, and appends `(已检测到)` / *(detected)* next to the ones found on your machine.
+
+**Step 2 — Install:**
+
+```bash
+# The four most common agent platforms in one go
+node install.mjs --agent claude-code,codex,dsh,workbuddy
+
+# Just dsh
+node install.mjs --agent dsh
+
+# Every platform detected on this machine
+node install.mjs --all
+
+# Install into a specific project instead of your home directory
+node install.mjs --agent dsh --project ./my-cocos-game
+```
+
+**Preview before writing anything** (recommended on first run):
+
+```bash
+node install.mjs --all --dry-run
+```
+
+**Full flag reference:**
+
+| Flag | Alias | Meaning |
+|---|---|---|
+| `--list` | `-l` | List all supported platforms, their target paths, and detection status |
+| `--agent <names>` | `-a` | Target platforms, comma-separated. Repeatable. |
+| `--all` | | Install to every platform **detected** on this machine |
+| `--project [dir]` | `-p` | Install project-level into `dir` (defaults to the current directory) |
+| `--link` | | Symlink instead of copy (Windows needs Developer Mode / admin) |
+| `--copy` | | Force copy — this is the default, chosen for Windows compatibility |
+| `--dry-run` | | Print planned actions, write nothing |
+| `--force` | `-f` | Overwrite an existing skill directory |
+| `--help` | `-h` | Show help |
+
+**Behaviour worth knowing:**
+
+- **Copy, not symlink**, by default — Windows users get a working install without enabling Developer Mode. Use `--link` if you prefer a single source of truth.
+- **Already installed → skipped**, not overwritten. Pass `--force` to upgrade in place.
+- **Exit code 1** if any target failed, so it is safe to use in scripts and CI.
+- Registered platforms: `universal`, `claude-code`, `codex`, `dsh`, `workbuddy`, `openclaw`, `cursor`, `github-copilot`, `gemini-cli`, `amp`, `cline`, `opencode`, `windsurf`, `kiro-cli`, `roo`, `kilo`, `trae`, `qoder`, `qwen-code`, `kimi-code-cli`, `iflow-cli`, `lingma`, `goose`, `junie`, `github-skills`.
+
+---
+
+### Method 3 — Manual install
+
+No npm, no Node — just files. This is also the way to go if you want to inspect exactly what lands on disk before it lands.
+
+**Clone the repo:**
+
+```bash
+git clone https://github.com/hsiaozzz/cocos-creator-skill.git
+cd cocos-creator-skill
+```
+
+**Option A — the universal directory (covers most platforms at once)**
+
+`~/.agents/skills/` is read by a large group of platforms: **Amp, Cline, Cursor (project-level), GitHub Copilot, Gemini CLI, Kilo Code, OpenCode, Warp, Zed, Kimi Code CLI** and more — plus **DeepSeek Harness**, which also scans `~/.agents/skills` as a fallback. Install once here and most of your tooling is covered.
+
+*macOS / Linux / Git Bash:*
 
 ```bash
 mkdir -p ~/.agents/skills
-cp -r cocos-creator-skill/skills/cocos-creator ~/.agents/skills/
+cp -r skills/cocos-creator ~/.agents/skills/
 ```
 
-`~/.agents/skills/` is the shared directory read by most platforms — installing there covers Amp, Cline, Cursor (project-level), Copilot, Gemini CLI, Kilo Code, OpenCode, Zed, Warp and more in one shot.
+*Windows PowerShell:*
 
-Per-platform paths: [docs/platforms.md](docs/platforms.md).
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
+Copy-Item -Recurse skills\cocos-creator "$env:USERPROFILE\.agents\skills\"
+```
 
-### Verify
+**Option B — a platform-specific directory**
 
-Restart your agent (or start a new session), then ask something that matches the trigger keywords:
+*macOS / Linux / Git Bash:*
+
+```bash
+# Claude Code
+mkdir -p ~/.claude/skills && cp -r skills/cocos-creator ~/.claude/skills/
+
+# Codex CLI  (honours $CODEX_HOME)
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills" && cp -r skills/cocos-creator "${CODEX_HOME:-$HOME/.codex}/skills/"
+
+# DeepSeek Harness (dsh)  (honours $DSH_HOME)
+mkdir -p "${DSH_HOME:-$HOME/.dsh}/skills" && cp -r skills/cocos-creator "${DSH_HOME:-$HOME/.dsh}/skills/"
+
+# WorkBuddy
+mkdir -p ~/.workbuddy/skills && cp -r skills/cocos-creator ~/.workbuddy/skills/
+
+# OpenClaw
+mkdir -p ~/.openclaw/skills && cp -r skills/cocos-creator ~/.openclaw/skills/
+```
+
+*Windows PowerShell:*
+
+```powershell
+# Claude Code
+Copy-Item -Recurse skills\cocos-creator "$env:USERPROFILE\.claude\skills\"
+# Codex CLI
+Copy-Item -Recurse skills\cocos-creator "$env:USERPROFILE\.codex\skills\"
+# DeepSeek Harness (dsh)
+Copy-Item -Recurse skills\cocos-creator "$env:USERPROFILE\.dsh\skills\"
+# WorkBuddy
+Copy-Item -Recurse skills\cocos-creator "$env:USERPROFILE\.workbuddy\skills\"
+```
+
+**Option C — project-level (commit it, share it with your team)**
+
+Copy the skill into your game project and commit it. Every teammate using the same agent gets the same Cocos conventions:
+
+```bash
+cd /path/to/your-cocos-game
+mkdir -p .agents/skills
+cp -r /path/to/cocos-creator-skill/skills/cocos-creator .agents/skills/
+```
+
+**Platform path reference:**
+
+| Platform | Project-level | User-level | Notes |
+|---|---|---|---|
+| **Universal** | `.agents/skills` | `~/.agents/skills` | Covers most platforms — prefer this one |
+| **Claude Code** | `.claude/skills` | `~/.claude/skills` | Overridable via `CLAUDE_CONFIG_DIR` |
+| **Codex CLI** | `.agents/skills` | `~/.codex/skills` | Overridable via `CODEX_HOME` |
+| **DeepSeek Harness (dsh)** | `.dsh/skills` · `.agents/skills` | `$DSH_HOME/skills` (default `~/.dsh/skills`) · `~/.agents/skills` | Overridable via `DSH_HOME`; also supports `customSkillDirs` |
+| **WorkBuddy** | `.workbuddy/skills` | `~/.workbuddy/skills` | Directory name must equal the `name` field (`cocos-creator`) |
+| **OpenClaw** | `skills` | `~/.openclaw/skills` | Legacy `~/.clawdbot`, `~/.moltbot` also still read |
+| **Cursor** | `.agents/skills` | `~/.cursor/skills` | — |
+| **GitHub Copilot** | `.agents/skills` | `~/.copilot/skills` | VS Code also reads `.github/skills` |
+| **Gemini CLI** | `.agents/skills` | `~/.gemini/skills` | Antigravity reads `~/.gemini/antigravity/skills` |
+| **Cline** | `.agents/skills` | `~/.agents/skills` | — |
+| **Kilo Code** | `.agents/skills` | `~/.kilo/skills` | Legacy `~/.kilocode` also read |
+| **OpenCode** | `.agents/skills` | `~/.config/opencode/skills` | — |
+| **Windsurf** | `.windsurf/skills` | `~/.codeium/windsurf/skills` | — |
+| **Kiro CLI** | `.kiro/skills` | `~/.kiro/skills` | — |
+| **Roo Code** | `.roo/skills` | `~/.roo/skills` | — |
+| **Trae / Trae CN** | `.trae/skills` | `~/.trae/skills` · `~/.trae-cn/skills` | — |
+| **Qoder / Qoder CN** | `.qoder/skills` | `~/.qoder/skills` · `~/.qoder-cn/skills` | — |
+| **Lingma (通义灵码)** | `.lingma/skills` | `~/.lingma/skills` | — |
+| **Qwen Code** | `.qwen/skills` | `~/.qwen/skills` | — |
+| **iFlow CLI** | `.iflow/skills` | `~/.iflow/skills` | — |
+| **Goose** | `.goose/skills` | `~/.config/goose/skills` | — |
+| **Junie** | `.junie/skills` | `~/.junie/skills` | — |
+| **Warp** | `.agents/skills` | `~/.agents/skills` | — |
+| **Zed** | `.agents/skills` | `~/.agents/skills` | — |
+| **Droid (Factory)** | `.agents/skills` | `~/.factory/skills` | — |
+
+> On Windows, expand `~` to `C:\Users\<your-name>`. Most platforms support `$XDG_CONFIG_HOME`; if you set it, `~/.config` paths move accordingly.
+
+> **Structure matters more than location.** Whatever directory you choose, the file must end up at exactly `<skills-dir>/cocos-creator/SKILL.md`. One extra nesting level (`.../cocos-creator/cocos-creator/SKILL.md`) is the single most common reason a skill silently never loads.
+
+---
+
+## Verify the installation
+
+**1. Confirm the files landed where you expect.** The command differs per method:
+
+```bash
+npx skills list -g                    # Method 1 (user-level; drop -g for project-level)
+node install.mjs --list               # Method 2 — prints detection status per platform
+ls ~/.agents/skills/cocos-creator/    # Method 3
+```
+
+Expected result — the skill folder contains:
+
+```
+cocos-creator/
+├── SKILL.md
+├── references/          (7 files)
+├── scripts/cocos_doctor.py
+└── assets/templates/
+```
+
+**2. Confirm the entry point is correct.** This one line catches nearly every broken install:
+
+```bash
+head -3 ~/.agents/skills/cocos-creator/SKILL.md
+```
+
+It must print:
+
+```
+---
+name: cocos-creator
+description: "Cocos Creator 3.8.x …
+```
+
+The `---` must be the very first line (no blank line, no BOM), and `name:` must be `cocos-creator`.
+
+**3. Restart the agent.** Most platforms only scan skills directories at startup. Reload the window, or start a new session. For dsh, a new session is enough — it watches the directory and hot-reloads `SKILL.md` changes.
+
+**4. Trigger the skill with a real request.** Say something that matches the skill's `description`:
 
 ```
 Write a player movement controller in Cocos Creator, and tell me which pitfalls I'll hit.
 ```
 
-A working install will first confirm your engine version, then give code, then insist on running verification.
+Ask the agent *"which skills do you have available?"* to check directly; in dsh you can also force-load it with `/cocos-creator`.
 
-### Coverage
+**A working install behaves like this:** the agent asks which engine version you are on **before** writing code, then gives the code, then insists on verification. If it dumps code immediately with no version question, the skill is not loaded.
 
-Version detection (2.x / 3.x / COCOS 4) · TypeScript components & lifecycle · Node/component system · Event pairing · Animation & tween · Physics · UI & multi-resolution · Asset loading, AssetBundle & object pools · DrawCall/batching/GC/package-size optimization · Publishing to WeChat & Douyin mini games, H5, iOS, Android, HarmonyOS Next · 3.8 → COCOS 4 migration.
+**If it does not trigger, check in this order:**
 
-### Built-in project doctor
+1. Is the file at `<skills-dir>/cocos-creator/SKILL.md` — exactly one level, no double nesting?
+2. Is the directory name exactly `cocos-creator` (must match frontmatter `name`)?
+3. Does `SKILL.md` start with `---` on line 1, with both `name` and `description` present?
+4. Is `description` wrapped in quotes if it contains a colon followed by a space? (`dsh` drops such frontmatter **silently** — no error, empty skill list.)
+5. Did you restart the agent or open a new session?
+6. Is the agent on the right scope — you installed user-level but the agent is looking at project-level, or vice versa?
+
+---
+
+## Project-level vs user-level
+
+| | Project-level | User-level |
+|---|---|---|
+| Lives in | A subdirectory of your game project | A subdirectory of your home directory |
+| Applies to | That project only | Every project on the machine |
+| Committed to git | Yes — the team shares one copy | No — local to you |
+| Use when | A team wants one shared Cocos convention | You do Cocos work across many projects |
+
+Choose per method:
+
+```bash
+npx skills add hsiaozzz/cocos-creator-skill --all -g      # Method 1: -g = user-level (default is project-level)
+node install.mjs --all --project .                         # Method 2: --project = project-level (default is user-level)
+cp -r skills/cocos-creator .agents/skills/                 # Method 3: wherever you copy it
+```
+
+For solo work, user-level is the better default — install once, use everywhere. For a team, committing the project-level copy into the game repo keeps everyone's agent answering with the same conventions.
+
+---
+
+## Update & uninstall
+
+**Update** — the repository is the source of truth; re-install to refresh:
+
+```bash
+npx skills update -g                     # Method 1 (user-level); -p for project-level
+node install.mjs --all --force           # Method 2: --force overwrites in place
+```
+
+If you installed with `--link` / symlinks, updating the clone is enough — no re-install needed.
+
+**Uninstall:**
+
+```bash
+npx skills remove -g -y                  # Method 1 (user-level); add -s cocos-creator to be explicit
+rm -rf ~/.agents/skills/cocos-creator    # Method 3 (adjust the path to wherever you installed)
+```
+
+Removing the `cocos-creator` folder is always sufficient and never touches anything else — nothing is registered outside that directory.
+
+---
+
+## What it covers
+
+| Area | Details |
+|---|---|
+| **Version detection** | Distinguishes 2.x / 3.x / COCOS 4 first, so the agent does not emit APIs that do not exist on your engine |
+| **Scripting** | TypeScript components, lifecycle callbacks, `@ccclass` / `@property` decorators |
+| **Nodes & components** | Lookup, hierarchy, instantiation, component caching |
+| **Events** | Register/unregister pairing to prevent leaks surviving scene changes |
+| **Animation** | `Animation` component and `tween` |
+| **Physics** | Rigid bodies, colliders, contact callbacks |
+| **UI** | Label / Sprite / Button / Widget / Layout, multi-resolution adaptation |
+| **Assets** | `resources.load`, AssetBundle, reference-counted release, object pools |
+| **Performance** | DrawCall and batching, GC spikes, package size and first-screen load — with quantified targets |
+| **Publishing** | WeChat & Douyin mini-game subpackaging, H5, iOS, Android, HarmonyOS Next |
+| **COCOS 4 migration** | 3.8 → COCOS 4 workflow, `cocos-cli` / headless builds, AI-native changes |
+
+---
+
+## Skill structure
+
+```
+skills/cocos-creator/
+├── SKILL.md                    # Entry point & router: core workflow + cheat sheet (< 500 lines)
+├── references/                 # Loaded on demand — costs no context until needed
+│   ├── api-quick-ref.md        # API quick reference
+│   ├── examples.md             # Complete runnable examples
+│   ├── best-practices.md       # Architecture & conventions
+│   ├── performance.md          # Quantified performance guide
+│   ├── publishing.md           # Multi-platform build & release
+│   ├── troubleshooting.md      # Problem-solving handbook
+│   └── cocos4-migration.md     # 3.8 → COCOS 4 migration
+├── scripts/
+│   └── cocos_doctor.py         # Project health check (zero dependencies)
+└── assets/templates/           # Component templates
+```
+
+**Progressive disclosure**: `SKILL.md` holds only the core workflow and a routing table; deep content is pulled from `references/` on demand so the skill never floods the model's context window.
+
+---
+
+## Built-in project doctor
+
+A zero-dependency Python script that audits a real Cocos project:
 
 ```bash
 python skills/cocos-creator/scripts/cocos_doctor.py --project /path/to/your-game
 ```
 
-Detects missing/orphan `.meta` files, oversized assets, bloated `assets/resources`, legacy 2.x APIs, and probable event-listener leaks. Supports `--json` for CI.
+It checks:
 
-### License
+- Assets missing `.meta` files (silently breaks references at build time)
+- Orphan `.meta` files (source deleted, meta left behind)
+- Oversized `assets/resources` (first-screen load risk — everything there is bundled)
+- Individual files over the size threshold (package size risk)
+- Legacy 2.x API remnants (`cc.Class` / `cc.Node` / `cc.director`)
+- Scripts that register event listeners with no visible unregister (leak risk)
+
+Add `--json` for machine-readable output. Exits `1` when ERROR-level issues are found, so it drops straight into CI.
+
+Verified against real projects — it caught a 3.4 MB `map120.prefab` package-size risk and legacy `cc.Node.prototype` usage.
+
+---
+
+## Troubleshooting install issues
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Agent never mentions the skill | Extra nesting level | Must be exactly `<skills-dir>/cocos-creator/SKILL.md` |
+| Agent never mentions the skill | Directory renamed | Directory name must equal frontmatter `name` → `cocos-creator` |
+| Agent never mentions the skill | No restart | Restart the agent / open a new session |
+| dsh: skill list is empty, no error at all | `description` contains an unquoted `:` | Wrap the value in quotes; dsh drops malformed frontmatter **silently** |
+| Frontmatter not parsed | File starts with a blank line or BOM | `---` must be line 1, byte for byte |
+| `npx skills` cannot install to dsh / WorkBuddy | No entry in its agent list | Use Method 2 or Method 3 |
+| Symlink creation fails on Windows | Developer Mode off | Use `--copy`, or the default `install.mjs` behaviour |
+| Wrong scope | Installed user-level, agent reads project-level | See [Project-level vs user-level](#project-level-vs-user-level) |
+| `node install.mjs` says source dir not found | Run from outside the repo | `cd` into the cloned repo root first |
+
+---
+
+## Contributing
+
+Issues and PRs are welcome. Fixing factual errors, adding new engine-version behaviour, and adding platform support are all valuable — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
 
 MIT — see [LICENSE](LICENSE)
-
----
-
-## 日本語
-
-### 概要
-
-[Agent Skills オープン標準](https://agentskills.io/specification) に準拠したスキルパッケージです。AI コーディングエージェントに Cocos Creator のゲーム開発知識とワークフローを注入します。
-
-単なるドキュメント集ではなく、**実行可能なワークフロー**です：エンジンのバージョン確認 → コード配置の特定 → 実装 → **検証（必須）** → 提出前セルフチェック。
-
-**Claude Code、Codex CLI、DeepSeek Harness (dsh)、WorkBuddy、Cursor、Copilot、Gemini CLI、OpenClaw など 100+ のプラットフォームでそのまま動作します。**
-
-### インストール
-
-```bash
-# 推奨：公式 skills CLI
-npx skills add hsiaozzz/cocos-creator-skill --all
-
-# または本リポジトリのインストーラー（dsh / WorkBuddy をカバー）
-git clone https://github.com/hsiaozzz/cocos-creator-skill.git
-cd cocos-creator-skill
-node install.mjs --list
-node install.mjs --agent claude-code,codex,dsh,workbuddy
-
-# または手動コピー
-mkdir -p ~/.agents/skills
-cp -r skills/cocos-creator ~/.agents/skills/
-```
-
-プラットフォーム別のパスは [docs/platforms.md](docs/platforms.md) を参照してください。
-
-### 検証
-
-エージェントを再起動（または新しいセッションを開始）してから：
-
-```
-Cocos Creator でプレイヤーの移動コントローラーを書いて。どんな落とし穴があるかも教えて。
-```
-
-### 収録内容
-
-バージョン判定（2.x / 3.x / COCOS 4）· TypeScript コンポーネントとライフサイクル · ノード／コンポーネント · イベント · アニメーション · 物理 · UI · アセット管理と AssetBundle · パフォーマンス最適化 · WeChat / Douyin ミニゲーム、H5、iOS、Android、HarmonyOS Next への公開 · COCOS 4 への移行。
-
-### ライセンス
-
-MIT — [LICENSE](LICENSE) を参照
-
----
-
-## 한국어
-
-### 개요
-
-[Agent Skills 오픈 표준](https://agentskills.io/specification) 을 따르는 스킬 패키지로, AI 코딩 에이전트에 Cocos Creator 게임 개발 지식과 워크플로를 주입합니다.
-
-단순한 문서 모음이 아니라 **실행 가능한 워크플로** 입니다: 엔진 버전 확인 → 코드 위치 파악 → 구현 → **검증(필수)** → 제출 전 자체 점검.
-
-**Claude Code, Codex CLI, DeepSeek Harness (dsh), WorkBuddy, Cursor, Copilot, Gemini CLI, OpenClaw 등 100+ 플랫폼에서 그대로 동작합니다.**
-
-### 설치
-
-```bash
-# 권장: 공식 skills CLI
-npx skills add hsiaozzz/cocos-creator-skill --all
-
-# 또는 이 저장소의 설치 스크립트 (dsh / WorkBuddy 지원)
-git clone https://github.com/hsiaozzz/cocos-creator-skill.git
-cd cocos-creator-skill
-node install.mjs --list
-node install.mjs --agent claude-code,codex,dsh,workbuddy
-
-# 또는 수동 복사
-mkdir -p ~/.agents/skills
-cp -r skills/cocos-creator ~/.agents/skills/
-```
-
-플랫폼별 경로는 [docs/platforms.md](docs/platforms.md) 를 참고하세요.
-
-### 확인
-
-에이전트를 재시작하거나 새 세션을 시작한 뒤:
-
-```
-Cocos Creator로 플레이어 이동 컨트롤러를 작성해줘. 어떤 함정이 있는지도 알려줘.
-```
-
-### 포함 내용
-
-버전 판별 (2.x / 3.x / COCOS 4) · TypeScript 컴포넌트와 라이프사이클 · 노드/컴포넌트 · 이벤트 · 애니메이션 · 물리 · UI · 에셋 관리와 AssetBundle · 성능 최적화 · WeChat / Douyin 미니게임, H5, iOS, Android, HarmonyOS Next 배포 · COCOS 4 마이그레이션.
-
-### 라이선스
-
-MIT — [LICENSE](LICENSE) 참조
